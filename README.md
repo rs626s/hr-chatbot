@@ -394,8 +394,8 @@ cat backup.sql | docker exec -i chatbot-postgres psql -U chatbot_user -d chatbot
 
 ## Contributors
 
-Team 4 – HR Chatbot API
-Missouri State University
+Team 4 – HR Chatbot API  
+Missouri State University  
 CSC 615 – AI Project
 
 ---
