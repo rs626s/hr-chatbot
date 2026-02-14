@@ -13,13 +13,11 @@ import java.util.Map;
 @RestController
 public class SystemStatusController {
 
-    @Value("${spring.application.name}")
+    @Value("${spring.application.name:HR Chatbot API}")
     private String appName;
 
     @Value("${spring.profiles.active:local}")
     private String environment;
-
-    private final JdbcTemplate jdbcTemplate;
 
     @Value("${CHROMADB_URL}")
     private String chromaUrl;
@@ -27,8 +25,34 @@ public class SystemStatusController {
     @Value("${OLLAMA_BASE_URL}")
     private String ollamaUrl;
 
+    private final JdbcTemplate jdbcTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
+
     public SystemStatusController(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @GetMapping("/")
+    public Map<String, Object> status() {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("service", appName);
+        response.put("status", "running");
+        response.put("message", "API is up and healthy");
+        response.put("timestamp", Instant.now());
+
+        return response;
+    }
+
+    @GetMapping("/info")
+    public Map<String, Object> info() {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("application", appName);
+        response.put("environment", environment);
+        response.put("timestamp", Instant.now());
+
+        return response;
     }
 
     @GetMapping("/system")
@@ -36,18 +60,16 @@ public class SystemStatusController {
 
         Map<String, Object> response = new HashMap<>();
 
-        response.put("application", "HR Chatbot API");
+        response.put("application", appName);
         response.put("status", "UP");
 
         // Database check
         try {
-            jdbcTemplate.execute("SELECT 1");
+            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
             response.put("database", "UP");
         } catch (Exception e) {
             response.put("database", "DOWN");
         }
-
-        RestTemplate restTemplate = new RestTemplate();
 
         // ChromaDB check
         try {
@@ -66,27 +88,6 @@ public class SystemStatusController {
         }
 
         response.put("timestamp", Instant.now());
-
-        return response;
-    }
-
-    @GetMapping("/info")
-    public Map<String, Object> info() {
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("application", appName);
-        response.put("environment", environment);
-        response.put("timestamp", Instant.now());
-
-        return response;
-    }
-
-    @GetMapping("/")
-    public Map<String, Object> status() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("service", "HR Chatbot API");
-        response.put("status", "running");
-        response.put("message", "API is up and healthy");
 
         return response;
     }
