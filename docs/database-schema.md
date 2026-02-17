@@ -122,6 +122,7 @@ Stores chat messages.
 | conversation_id (FK) |
 +----------------------+
 
+
 ---
 
 # JPA Mapping Notes
