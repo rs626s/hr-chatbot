@@ -1,4 +1,4 @@
-# HR Chatbot API
+# HR Chatbot Application
 
 ## Overview
 
