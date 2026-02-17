@@ -43,11 +43,11 @@ class JwtTokenProviderTest {
 
         String token = jwtTokenProvider.generateToken("testuser");
 
-        Claims claims = Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .parseClaimsJws(token)
+                .getBody();
         assertEquals("testuser", claims.getSubject());
     }
 
@@ -56,12 +56,11 @@ class JwtTokenProviderTest {
 
         String token = jwtTokenProvider.generateToken("testuser");
 
-        Claims claims = Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
+                .parseClaimsJws(token)
+                .getBody();
         assertEquals("testuser", claims.getSubject());
 
         assertNotNull(claims.getExpiration());
