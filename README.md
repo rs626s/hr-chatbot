@@ -27,7 +27,6 @@ hr-chatbot-api/
 ├── .env.example
 ├── init-scripts/
 ├── nginx/
-├── docs/
 └── pom.xml
 ```
 
