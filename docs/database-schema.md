@@ -81,7 +81,8 @@ Stores chat messages.
 ---
 
 # Logical Schema Diagram
-```
+
+```text
 +----------------------+
 |        users         |
 +----------------------+
@@ -121,8 +122,9 @@ Stores chat messages.
 | created_at           |
 | conversation_id (FK) |
 +----------------------+
-
 ```
+
+
 ---
 
 # JPA Mapping Notes
