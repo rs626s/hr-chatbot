@@ -2,6 +2,7 @@ package edu.missouristate.csc615.chatbot.service;
 
 import edu.missouristate.csc615.chatbot.dto.RegisterRequest;
 import edu.missouristate.csc615.chatbot.entity.User;
+import edu.missouristate.csc615.chatbot.exception.InvalidCredentialsException;
 import edu.missouristate.csc615.chatbot.exception.UnauthorizedException;
 import edu.missouristate.csc615.chatbot.exception.UserAlreadyExistsException;
 import edu.missouristate.csc615.chatbot.repository.UserRepository;
@@ -46,14 +47,15 @@ public class UserServiceImpl implements UserService {
     public User authenticateUser(String username, String password) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Invalid username or password"));
+                .orElseThrow(() ->
+                        new InvalidCredentialsException("Invalid username or password"));
+
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw new InvalidCredentialsException("Invalid username or password");
+        }
 
         if (!user.getEnabled()) {
             throw new UnauthorizedException("User account is disabled");
-        }
-
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new UnauthorizedException("Invalid username or password");
         }
 
         return user;
