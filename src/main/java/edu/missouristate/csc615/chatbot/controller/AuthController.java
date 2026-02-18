@@ -4,61 +4,105 @@ import edu.missouristate.csc615.chatbot.dto.AuthResponse;
 import edu.missouristate.csc615.chatbot.dto.LoginRequest;
 import edu.missouristate.csc615.chatbot.dto.RegisterRequest;
 import edu.missouristate.csc615.chatbot.entity.User;
-import edu.missouristate.csc615.chatbot.security.JwtTokenProvider;
-import edu.missouristate.csc615.chatbot.service.UserService;
+import edu.missouristate.csc615.chatbot.repository.UserRepository;
+import edu.missouristate.csc615.chatbot.security.JwtUtil;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Validated
 public class AuthController {
 
-    private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
 
-        User user = userService.registerUser(request);
+        // Check if username already exists
+        if (userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Error: Username is already taken!");
+        }
 
-        String token = jwtTokenProvider.generateToken(user.getUsername());
+        // Check if email already exists
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Error: Email is already in use!");
+        }
 
-        AuthResponse response = new AuthResponse(
-                token,
-                "Bearer",
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRole()
-        );
+        // Create new user
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        user.setRole("USER");
+        user.setEnabled(true);
+
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("User registered successfully!");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest request) {
 
-        User user = userService.authenticateUser(
-                request.getUsername(),
-                request.getPassword()
-        );
+        try {
+            // Authenticate user
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
 
-        String token = jwtTokenProvider.generateToken(user.getUsername());
+            // Generate JWT token
+            String token = jwtUtil.generateToken(request.getUsername());
 
-        AuthResponse response = new AuthResponse(
-                token,
-                "Bearer",
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRole()
-        );
+            // Get user details
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return ResponseEntity.ok(response);
+            // Build response
+            AuthResponse response = new AuthResponse(
+                    token,
+                    "Bearer",
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getRole()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Error: Invalid username or password!");
+        }
     }
 }
