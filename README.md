@@ -2,281 +2,209 @@
 
 ## Overview
 
-The HR Chatbot API is a Spring Boot backend service that provides authentication, conversation management, and integration with AI services.
+The HR Chatbot API is a Spring Boot backend service that provides:
 
-It supports local development with H2 and production deployment with PostgreSQL and Flyway.
+-   Spring Security authentication
+-   JWT based stateless authorization
+-   BCrypt password hashing
+-   Conversation management
+-   PostgreSQL database with Flyway migrations
+-   Integration with AI services (ChromaDB and Ollama)
+
+The system supports local development and production deployment using
+Docker.
+
+------------------------------------------------------------------------
 
 ## Key Features
 
-1. Spring Security authentication
-2. JWT based stateless authorization
-3. BCrypt password hashing
-4. PostgreSQL database with Flyway migrations
-5. Environment based configuration using .env
-6. Actuator health and monitoring endpoints
+-   Spring Security with JWT authentication
+-   Secure password hashing using BCrypt
+-   PostgreSQL with Flyway schema versioning
+-   Docker based infrastructure
+-   Environment based configuration using .env
+-   Actuator health and monitoring endpoints
+
+------------------------------------------------------------------------
 
 ## Project Structure
 
-```text
-hr-chatbot-api/
-├── src/
-├── Dockerfile
-├── docker-compose.yml
-├── .env
-├── .env.example
-├── init-scripts/
-├── nginx/
-├── docs/
-└── pom.xml
-```
+hr-chatbot-api/ src/ Dockerfile docker-compose.yml .env .env.example
+init-scripts/ nginx/ docs/ pom.xml
+
+------------------------------------------------------------------------
 
 ## Prerequisites
 
-Local Development
+Local Development: - Java 17 - Maven - Docker optional
 
-1. Java 17
-2. Maven
-3. Docker optional
+Server Deployment: - Linux server - Docker Engine - Docker Compose - Git
 
-Server Deployment
-
-1. Linux server
-2. Docker Engine
-3. Docker Compose
-4. Git
+------------------------------------------------------------------------
 
 ## Running Locally
 
 Default profile is local.
 
-Build
+Build the project:
 
-```bash
 mvn clean install
-```
 
-Run
+Run the application:
 
-```bash
 mvn spring-boot:run
-```
 
-Application URL
+Application URL:
 
-```text
 http://localhost:8080
-```
 
-H2 Console
+H2 Console:
 
-```text
 http://localhost:8080/h2-console
-```
 
-Local profile uses H2 in memory database with automatic schema creation.
+Local profile uses H2 database with automatic schema creation.
 
-## Running with PostgreSQL in Production Mode
+------------------------------------------------------------------------
 
-Step 1 Create environment file
+## Running with PostgreSQL (Production Mode)
 
-```bash
-cp .env.example .env
-nano .env
-```
+Step 1: Create environment file
 
-Example .env
+cp .env.example .env nano .env
 
-```env
-POSTGRES_DB=chatbotdb
-POSTGRES_USER=chatbot_user
-POSTGRES_PASSWORD=StrongSecurePasswordHere
-POSTGRES_PORT=5432
+Example .env:
+
+POSTGRES_DB=chatbotdb POSTGRES_USER=chatbot_user
+POSTGRES_PASSWORD=StrongSecurePasswordHere POSTGRES_PORT=5432
 
 SPRING_PROFILES_ACTIVE=prod
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/chatbotdb
 SPRING_DATASOURCE_USERNAME=chatbot_user
 SPRING_DATASOURCE_PASSWORD=StrongSecurePasswordHere
 
-JWT_SECRET=VeryStrongJWTSecretKey
-JWT_EXPIRATION=86400000
-```
+JWT_SECRET=VeryStrongJWTSecretKey JWT_EXPIRATION=86400000
 
-Step 2 Start PostgreSQL
+Step 2: Start PostgreSQL
 
-```bash
 docker compose up -d
-```
 
-Step 3 Run Spring Boot
+Step 3: Run Spring Boot
 
-```bash
-export $(grep -v '^#' .env | xargs)
-mvn spring-boot:run
-```
+export \$(grep -v '\^#' .env \| xargs) mvn spring-boot:run
 
-Production profile uses PostgreSQL and Flyway with ddl auto set to validate.
+Production profile uses PostgreSQL and Flyway with ddl-auto set to
+validate.
 
-## Full Docker Deployment Optional
+------------------------------------------------------------------------
 
-Build and run all services
+## Full Docker Deployment
 
-```bash
+Build and run all services:
+
 docker compose up -d --build
-```
+
+------------------------------------------------------------------------
 
 ## API Endpoints
 
-Authentication
+Authentication:
 
-```text
-POST /api/auth/register
-POST /api/auth/login
-```
+POST /api/auth/register POST /api/auth/login
 
-For protected endpoints, include JWT token in the Authorization header
+Include JWT token in Authorization header:
 
-```text
-Authorization: Bearer <token>
-```
+Authorization: Bearer `<token>`{=html}
 
-System endpoints
+System endpoints:
 
-```text
-GET /
-GET /system
-GET /info
-GET /actuator/health
-```
+GET / GET /system GET /info GET /actuator/health
+
+------------------------------------------------------------------------
 
 ## Database
 
-Local
+Local: H2 in memory database
 
-H2 in memory database
+Production: PostgreSQL 16 running in Docker Flyway manages schema
+migrations
 
-Production
+Tables: users conversations messages
 
-PostgreSQL 16 running in Docker  
-Flyway manages schema migrations
-
-Tables
-
-1. users
-2. conversations
-3. messages
+------------------------------------------------------------------------
 
 ## Environment Variables
 
-Database
+Database: POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD POSTGRES_PORT
 
-1. POSTGRES_DB
-2. POSTGRES_USER
-3. POSTGRES_PASSWORD
-4. POSTGRES_PORT
+Spring Boot: SPRING_PROFILES_ACTIVE SPRING_DATASOURCE_URL
+SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD
 
-Spring Boot
+Security: JWT_SECRET JWT_EXPIRATION
 
-1. SPRING_PROFILES_ACTIVE
-2. SPRING_DATASOURCE_URL
-3. SPRING_DATASOURCE_USERNAME
-4. SPRING_DATASOURCE_PASSWORD
+AI Services: CHROMADB_URL OLLAMA_BASE_URL
 
-Security
-
-1. JWT_SECRET
-2. JWT_EXPIRATION
-
-AI Services
-
-1. CHROMADB_URL
-2. OLLAMA_BASE_URL
+------------------------------------------------------------------------
 
 ## Deployment on Server
 
-Install Docker
+Install Docker:
 
-```bash
-docker --version
-docker compose version
-```
+docker --version docker compose version
 
-Clone project
+Clone project:
 
-```bash
-git clone <repository-url>
-cd hr-chatbot-api
-```
+git clone `<repository-url>`{=html} cd hr-chatbot-api
 
-Configure environment
+Configure environment:
 
-```bash
-cp .env.example .env
-nano .env
-```
+cp .env.example .env nano .env
 
-Start PostgreSQL
+Start services:
 
-```bash
 docker compose up -d
-```
 
-Run application
+Run application:
 
-```bash
-export $(grep -v '^#' .env | xargs)
-mvn spring-boot:run
-```
+export \$(grep -v '\^#' .env \| xargs) mvn spring-boot:run
+
+------------------------------------------------------------------------
 
 ## Updating Deployment
 
-Pull latest changes and rebuild
+git pull mvn clean package
 
-```bash
-git pull
-mvn clean package
-```
+If using full Docker:
 
-If using full Docker deployment
+docker compose down docker compose up -d --build
 
-```bash
-docker compose down
-docker compose up -d --build
-```
+------------------------------------------------------------------------
 
 ## Stop Services
 
-```bash
 docker compose down
-```
+
+------------------------------------------------------------------------
 
 ## Database Backup
 
-Backup
+Backup:
 
-```bash
-docker exec chatbot-postgres pg_dump -U chatbot_user chatbotdb > backup.sql
-```
+docker exec chatbot-postgres pg_dump -U chatbot_user chatbotdb \>
+backup.sql
 
-Restore
+Restore:
 
-```bash
-cat backup.sql | docker exec -i chatbot-postgres psql -U chatbot_user -d chatbotdb
-```
+cat backup.sql \| docker exec -i chatbot-postgres psql -U chatbot_user
+-d chatbotdb
+
+------------------------------------------------------------------------
 
 ## Architecture Overview
 
-```text
-Nginx
-  |
-Spring Boot Application
-  |
-PostgreSQL Database
-ChromaDB
-Ollama
-```
+Nginx \| Spring Boot Application \| PostgreSQL Database ChromaDB Ollama
+
+------------------------------------------------------------------------
 
 ## Contributors
 
-Team 4  
-Missouri State University  
-CSC 615 Advanced Internet Programming
+Team 4 Missouri State University CSC 615 Advanced Internet Programming
