@@ -21,6 +21,25 @@ services:
       timeout: 5s
       retries: 5
 
+  hr-chatbot:
+    build: .
+    container_name: hr-chatbot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-chatbotdb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-chatbot_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     driver: local
