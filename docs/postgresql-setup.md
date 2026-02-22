@@ -215,13 +215,6 @@ docker-compose down -v
 
 ## Final Architecture
 
-Server ├── Docker → PostgreSQL (Persistent Volume) └── Maven → Spring
-Boot (Production Profile) ↓ Connects via localhost:5432
-
-PostgreSQL Docker setup is complete and production-ready.
-
-## Final Architecture
-
 ```text
 Server
 ├── Docker → PostgreSQL (Persistent Volume)
