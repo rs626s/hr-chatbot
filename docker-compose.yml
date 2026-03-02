@@ -11,9 +11,9 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - ai-chatbot_default
+      - ai-chatbot_chatbot-network
     restart: unless-stopped
 
 networks:
-  ai-chatbot_default:
+  ai-chatbot_chatbot-network:
     external: true
