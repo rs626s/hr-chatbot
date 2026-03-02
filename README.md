@@ -7,7 +7,7 @@
 - Authentication (Spring Security + JWT)
 - Conversation and message management
 - Integration hooks for AI services
-- Production database: **PostgreSQL 16** (via Docker)
+- Production database: **PostgreSQL 15** (via Docker)
 
 This project is designed to run fully with **Docker Compose**:
 
@@ -23,7 +23,7 @@ This project is designed to run fully with **Docker Compose**:
 - Spring Boot
 - Spring Security + JWT
 - Spring Data JPA
-- PostgreSQL 16
+- PostgreSQL 15
 - Flyway (database migrations)
 - Docker + Docker Compose
 
